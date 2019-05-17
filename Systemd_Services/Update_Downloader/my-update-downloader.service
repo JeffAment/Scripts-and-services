@@ -1,0 +1,13 @@
+[Unit]
+ Description=Downloads packages from pacman, but does not install them.
+ After=network-online.target
+
+[Service]
+ Type=simple
+ ExecStart=/usr/bin/pacman -Syuw --noconfirm
+ TimeoutStopSec=180
+ KillMode=process
+ KillSignal=SIGINT
+
+[Install]
+ WantedBy=multi-user.target

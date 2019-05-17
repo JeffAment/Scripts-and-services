@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script suspends a process, or multiple processes sharing the same name,
+# for a set amount of time and then resumes said process[es]
+
+# This function expects an argument that will be written to stderr in the event
+# of a non-zero exit status.
+checkExitStatusAndReportAndExit() {
+   if [[ "${?}" -ne 0 ]]; then
+      echo "${@}" >&2
+      exit 1
+   fi
+}
+
+# Leave this as false unless you have a special use case that requires root
+readonly MUST_RUN_AS_SUPERUSER=FALSE
+
+if [ "${MUST_RUN_AS_SUPERUSER}" = TRUE ] && [ "${UID}" -ne 0 ]; then
+   echo "You must run this script as a superuser." >&2
+   exit 1
+fi
+
+# Bracket expansion around one character to prevent grep process from showing up
+# Case sensitive unless grep ignore case flag is set
+readonly PROCESS_NAME="[G]TA5.exe"
+readonly SLEEP_TIME=10s
+readonly PIDS=$(ps ax | grep "${PROCESS_NAME}" | awk '{printf $1" "}')
+
+kill -STOP "${PIDS}" &> /dev/null
+checkExitStatusAndReportAndExit 'The process[es] could not be stopped.  Verify that is is running.'
+sleep "${SLEEP_TIME}"
+kill -CONT "${PIDS}" &> /dev/null
+checkExitStatusAndReportAndExit 'The process[es] could not be resumed.'
+
+exit 0
