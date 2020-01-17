@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while [ true ]
+do
+	# Window ID will be in hex, so we convert to decimal for xdotool
+	WINDOW_ID=$(wmctrl -l | awk '/Shadow/ {print strtonum($1)}')
+	xdotool key --window $WINDOW_ID --delay 800 Escape Escape 
+done
